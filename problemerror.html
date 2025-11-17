@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>E-Challan Error Report Submission - Government of Balochistan</title>
+<style>
+body {
+    margin:0; padding:0; background:#eef3ee; font-family:"Segoe UI",Arial,sans-serif;
+}
+.header {
+    background:#0b3a7a; padding:25px; text-align:center; color:white; font-size:28px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
+}
+.container {
+    width:700px; /* Wider container for better form layout */
+    margin:55px auto; 
+    background:white; 
+    padding:32px; 
+    border-radius:10px; 
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+}
+h2 {text-align:center; font-size:22px; margin-bottom:10px; color:#333; font-weight:600;}
+.subtitle {text-align:center; font-size:14px; color:#666; margin-bottom:30px;}
+label {font-weight:600; font-size:14px; display:block; margin-top:15px;}
+input[type="text"], input[type="email"], textarea, select {
+    width:100%; 
+    padding:12px; 
+    margin-top:6px; 
+    border:1px solid #b5b5b5; 
+    border-radius:5px; 
+    font-size:15px;
+    box-sizing: border-box; 
+}
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+button {width:100%; padding:14px; margin-top:30px; background:#e84949; color:white; border:none; font-size:16px; border-radius:5px; cursor:pointer; font-weight:600;}
+button:hover {background:#cc3e3e;}
+.note {margin-top:25px; text-align:center; font-size:12px; color:#444;}
+.hidden {display:none;}
+
+/* --- Spinner Styles --- */
+.spinner {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #0b3a7a; /* Blue to spin */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px auto; /* Centered with bottom margin */
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+/* --- End Spinner Styles --- */
+
+/* Loading Message Style */
+.loading-message {
+    text-align: center;
+    font-size: 16px;
+    padding: 20px;
+    font-weight: 600;
+}
+
+/* Validation feedback styles */
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none; 
+}
+.input-error {
+    border-color: red !important;
+}
+
+/* Success Message Styling */
+.success-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #0b3a7a;
+}
+.success-message h2 {
+    color: #17a2b8; 
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.icon-check {
+    font-size: 80px;
+    color: #17a2b8;
+    line-height: 1;
+    display: block;
+    margin-bottom: 20px;
+}
+
+</style>
+<script>
+// Function to clear all error messages
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('input-error'));
+}
+
+// Function to handle field validation
+function validateField(field, errorId, customMessage) {
+    const value = field.value.trim();
+    const errorEl = document.getElementById(errorId);
+    field.classList.remove("input-error");
+    errorEl.style.display = 'none';
+
+    if (value === "" || value === "0") { // Assuming '0' is the default for select/dropdowns
+        field.classList.add("input-error");
+        errorEl.innerHTML = customMessage || "This required field cannot be empty.";
+        errorEl.style.display = 'block';
+        return false;
+    }
+    return true;
+}
+
+// Main submission function
+function submitErrorForm() {
+    clearErrors();
+    let isValid = true;
+    
+    // 1. Validate Required Fields
+    isValid &= validateField(document.getElementById("paymentID"), "paymentIDError", "Payment ID is required.");
+    isValid &= validateField(document.getElementById("reporterName"), "reporterNameError", "Your Full Name is required.");
+    isValid &= validateField(document.getElementById("reporterEmail"), "reporterEmailError", "A valid email is required for correspondence.");
+    isValid &= validateField(document.getElementById("cnic"), "cnicError", "CNIC is required.");
+    isValid &= validateField(document.getElementById("errorType"), "errorTypeError", "Please select the type of error.");
+    isValid &= validateField(document.getElementById("explanation"), "explanationError", "A detailed explanation is required.");
+
+    // 2. Validate Email format (Basic check)
+    const emailField = document.getElementById("reporterEmail");
+    if (isValid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailField.value.trim())) {
+        emailField.classList.add("input-error");
+        document.getElementById("reporterEmailError").innerHTML = "Please enter a valid email address.";
+        document.getElementById("reporterEmailError").style.display = 'block';
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        window.scrollTo(0, 0); // Scroll to top to show first error
+        return; 
+    }
+
+    // 3. If validation passes, show loading screen
+    document.getElementById("errorForm").style.display="none";
+    document.getElementById("loading-submission").style.display="block";
+    window.scrollTo(0, 0);
+
+    // 4. Set a delay before showing success
+    setTimeout(()=>{
+        document.getElementById("loading-submission").style.display="none";
+        document.getElementById("successMessage").style.display="block";
+        window.scrollTo(0, 0);
+    }, 3000); // 3 second delay
+}
+</script>
+</head>
+<body>
+
+<div class="header">Government of Balochistan E-CHALLAN Portal</div>
+
+<div class="container hidden" id="loading-submission">
+    <div class="loading-message">
+        <div class="spinner"></div> <h2>Submitting Report...</h2>
+        <div style="margin-top:10px; font-size:14px;">Please wait while your report and evidence are securely transmitted.</div>
+    </div>
+</div>
+
+<div class="container" id="errorForm">
+    <h2>E-Challan Discrepancy & Error Report</h2>
+    <div class="subtitle">Use this form if you believe your challan was issued in error (e.g., automated detection mistake).</div>
+
+    <label>Payment ID / Challan ID (Required)</label>
+    <input type="text" id="paymentID" placeholder="Enter the unique payment ID from your notice">
+    <div id="paymentIDError" class="error-message"></div>
+
+    <label>Name (As stated in the challan notice)</label>
+    <input type="text" id="reporterName" placeholder="Enter your full name">
+    <div id="reporterNameError" class="error-message"></div>
+
+    <label>CNIC (National Identity Card)</label>
+    <input type="text" id="cnic" placeholder="Enter your 13-digit CNIC number">
+    <div id="cnicError" class="error-message"></div>
+    
+    <label>Email Address for Correspondence</label>
+    <input type="email" id="reporterEmail" placeholder="Enter your email address">
+    <div id="reporterEmailError" class="error-message"></div>
+
+    <label>Type of Error Claimed (Required)</label>
+    <select id="errorType">
+        <option value="0">--- Select Error Category ---</option>
+        <option value="platemismatch">Automated Number Plate Mismatch (Plate detected is wrong)</option>
+        <option value="vehicledifference">Vehicle Model/Color is Incorrect</option>
+        <option value="speedmiscalibration">Speed Detection/Limit Calibration Error</option>
+        <option value="idmismatch">ID/Garrison Card Mismatch (Not my vehicle/card)</option>
+        <option value="other">Other (Explain in the box below)</option>
+    </select>
+    <div id="errorTypeError" class="error-message"></div>
+    
+    <label>Detailed Explanation of the Error (Required)</label>
+    <textarea id="explanation" placeholder="Provide a detailed explanation of the error, including all relevant information and facts."></textarea>
+    <div id="explanationError" class="error-message"></div>
+
+    <h3>Supporting Information (Optional)</h3>
+    <label>Correct Vehicle Number Plate (If Plate Mismatch)</label>
+    <input type="text" id="correctPlate" placeholder="Enter the correct registration number">
+    
+    <label>Upload Supporting Evidence</label>
+    <input type="file" multiple style="border: none; padding: 0;">
+    <div class="note" style="margin-top: 5px;">Max file size: 5MB per file. Only PDF, JPG, or PNG formats are accepted.</div>
+
+    <button onclick="submitErrorForm()">Submit Error Report for Review</button>
+    <div class="note">Submission of this form places your challan under review. **Do not attempt to pay the challan** until a decision has been reached and communicated via email.</div>
+</div>
+
+<div class="container hidden" id="successMessage">
+    <div class="success-message">
+        <span class="icon-check">✔</span>
+        <h2>Error Report Submitted Successfully!</h2>
+        <p>Your report has been received and assigned a case number. Your challan payment deadline is suspended pending review.</p>
+        <p style="font-weight: bold; margin-top: 20px;">We aim to review all reports within 5 working days.</p>
+        <p>A confirmation email containing your case number has been sent to the email address provided.</p>
+        <div class="note" style="margin-top: 30px;">
+            If the decision is in your favor, the challan will be dismissed. If the decision upholds the challan, you will receive a new payment deadline.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
